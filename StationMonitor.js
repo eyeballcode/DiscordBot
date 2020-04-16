@@ -77,7 +77,23 @@ module.exports = class StationMonitor {
 
   async checkDeparture(playDelayed, msToDeparture, nextDeparture) {
     if (playDelayed) {
-      let minutesToDeparture = msToDeparture / 1000 / 60
+      let minutesToDeparture = Math.round(msToDeparture / 1000 / 60)
+      let serviceName = this.getServiceNameFiles(nextDeparture.scheduledDepartureTime, nextDeparture.destination)
+
+      let messageData = [
+        ...serviceName, 'item/qitem06',
+        `time/dept_min/dep${minutesToDeparture < 10 ? '0' + minutesToDeparture : minutesToDeparture}_m`
+      ]
+
+      let data = [
+        'tone/chime', `platform/attn/pltatn${nextDeparture.platform < 10 ? '0' + nextDeparture.platform : nextDeparture.platform}`,
+        ...messageData, 'tone/pause3', ...messageData
+      ]
+
+      let outputFile = path.join(__dirname, `output-${nextDeparture.scheduledDepartureTime.format('HHmm')}-delay.wav`)
+
+      await this.writeAudio(data, outputFile)
+      this.audioQueue.schedulePlay(outputFile)
     } else {
       if (this.runIDsSeen.includes(nextDeparture.runID)) return
       this.runIDsSeen.push(nextDeparture.runID)
@@ -328,8 +344,9 @@ module.exports = class StationMonitor {
   }
 
   readFile(file) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       fs.readFile(file, (err, data) => {
+        if (err) return reject(err)
         resolve(data)
       })
     })
@@ -343,9 +360,7 @@ module.exports = class StationMonitor {
     })
   }
 
-  getServiceNameFiles(scheduledDepartureTime, destination) {
-    let scheduledMoment = this.moment(scheduledDepartureTime)
-
+  getServiceNameFiles(scheduledMoment, destination) {
     let scheduledHour = scheduledMoment.get('hour')
     let scheduledHour12 = scheduledHour % 12
     let scheduledMinute = scheduledMoment.get('minute')
@@ -378,6 +393,26 @@ module.exports = class StationMonitor {
     ]
   }
 
+  async writeAudio(pattern, outputFile) {
+    let fileData = await async.map(pattern.concat(['tone/pause3', 'tone/dtmf_s', 'tone/dtmf_s']), async name => {
+      let filePath = path.join(config.VOICE_PATH, name + '.wav')
+      let fileData = await this.readFile(filePath)
+      let result = wav.decode(fileData)
+      return result.channelData
+    })
+
+    let left = []
+    let right = []
+    fileData.forEach(fileData => {
+      left = [...left, ...fileData[0]]
+      right = [...right, ...fileData[1]]
+    })
+
+    let buffer = wav.encode([left, right], {sampleRate: 44100, float: true, bitDepth: 32})
+
+    await this.writeFile(outputFile, buffer)
+  }
+
   async generateAudio(platform, audioPattern, scheduledDepartureTime, destination, station) {
     let greeting
     let now = this.moment()
@@ -408,25 +443,8 @@ module.exports = class StationMonitor {
       ...serviceData, 'tone/pause3', 'item/qitem14'
     ]
 
-    let fileData = await async.map(fullPattern, async name => {
-      let filePath = path.join(config.VOICE_PATH, name + '.wav')
-      let fileData = await this.readFile(filePath)
-      let result = wav.decode(fileData)
-      return result.channelData
-    })
-
-    let left = []
-    let right = []
-    fileData.forEach(fileData => {
-      left = [...left, ...fileData[0]]
-      right = [...right, ...fileData[1]]
-    })
-
-    let buffer = wav.encode([left, right], {sampleRate: 44100, float: true, bitDepth: 32})
-
-    let outputFile = path.join(__dirname, `output-${station}-${this.moment(scheduledDepartureTime).format('HHmm')}-${destination}.wav`)
-
-    await this.writeFile(outputFile, buffer)
+    let outputFile = path.join(__dirname, `output-${station}-${scheduledDepartureTime.format('HHmm')}-${destination}.wav`)
+    await this.writeAudio(fullPattern, outputFile)
 
     return outputFile
   }
@@ -477,13 +495,15 @@ module.exports = class StationMonitor {
 
       let announcedDestination = (destination === 'Flinders Street' && viaCityLoop) ? 'City Loop' : destination
 
-      let outputFile = await this.generateAudio(nextDeparture.platform_number, audioPattern, nextDeparture.scheduled_departure_utc, destination, this.station)
+      let outputFile = await this.generateAudio(nextDeparture.platform_number, audioPattern, this.moment(nextDeparture.scheduled_departure_utc), announcedDestination, this.station)
 
       return {
         scheduledDepartureTime: this.moment(nextDeparture.scheduled_departure_utc),
         estimatedDepartureTime: this.moment(nextDeparture.estimated_departure_utc),
+        destination: announcedDestination,
         outputFile,
-        runID: nextDeparture.run_id
+        runID: nextDeparture.run_id,
+        platform: nextDeparture.platform_number
       }
     })).filter(Boolean)
   }
