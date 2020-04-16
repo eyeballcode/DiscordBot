@@ -54,7 +54,7 @@ module.exports = class StationMonitor {
 
   async audioScheduler() {
     let nextDepartures = await this.getFullNextDepartures()
-    if (!nextDepartures.length) return setTimeout(audioScheduler, 1000 * 60 * 5)
+    if (!nextDepartures.length) return setTimeout(audioScheduler, 1000 * 60 * 6)
     this.nextDepartures = nextDepartures
 
     for (let i in this.monitorTimeouts) clearTimeout(i)
@@ -470,7 +470,7 @@ module.exports = class StationMonitor {
     let routes = departurePayload.routes
 
     let nextDeparture = departures.sort((a, b) => new Date(a.actual_departure_utc) - new Date(b.actual_departure_utc))[0]
-    if (this.minutesDifference(nextDeparture.actual_departure_utc) > 120) return null
+    if (this.minutesDifference(nextDeparture.actual_departure_utc) > 10) return null
 
     return {
       scheduledDepartureTime: this.moment(nextDeparture.scheduled_departure_utc),
@@ -488,7 +488,7 @@ module.exports = class StationMonitor {
 
     let nextDepartures = departures.filter(e => e.platform_number !== 'RRB').sort((a, b) => new Date(a.actual_departure_utc) - new Date(b.actual_departure_utc)).slice(0, 3)
     return (await async.map(nextDepartures, async nextDeparture => {
-      if (this.minutesDifference(nextDeparture.actual_departure_utc) > 120) return null
+      if (this.minutesDifference(nextDeparture.actual_departure_utc) > 10) return null
 
       let runID = nextDeparture.run_id
       let routeName = routes[nextDeparture.route_id].route_name
