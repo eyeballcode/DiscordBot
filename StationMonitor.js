@@ -103,7 +103,7 @@ module.exports = class StationMonitor {
       await this.writeAudio(data, outputFile)
       this.audioQueue.schedulePlay(outputFile)
     } else {
-      if (this.runIDsSeen.includes(nextDeparture.runID)) return
+      if (this.runIDsSeen.includes(nextDeparture.runID)) return fs.unlink(nextDeparture.outputFile, () => {})
       this.runIDsSeen.push(nextDeparture.runID)
       this.audioQueue.schedulePlay(nextDeparture.outputFile)
     }
@@ -463,7 +463,7 @@ module.exports = class StationMonitor {
   }
 
   async getNextDeparture() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=7&expand=run&expand=route`)
+    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=5&expand=run&expand=route`)
 
     let departures = departurePayload.departures.map(this.transformDeparture)
     let runs = departurePayload.runs
@@ -480,7 +480,7 @@ module.exports = class StationMonitor {
   }
 
   async getFullNextDepartures() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=7&expand=run&expand=route`)
+    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=5&expand=run&expand=route`)
 
     let departures = departurePayload.departures.map(this.transformDeparture)
     let runs = departurePayload.runs
