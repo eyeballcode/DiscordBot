@@ -41,7 +41,13 @@ module.exports = class StationMonitor {
 
     this.runIDsSeen = []
 
+    let files = fs.readdirSync(__dirname).filter(e => e.endsWith('.wav'))
+    files.forEach(file => {
+      fs.unlinkSync(file)
+    })
+
     this.audioScheduler()
+
   }
 
   async audioScheduler() {
