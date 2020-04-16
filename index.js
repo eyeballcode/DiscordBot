@@ -2,9 +2,10 @@ require('dotenv').config()
 const Discord = require('discord.js')
 const bot = new Discord.Client()
 
+const config = require('./config.json')
 const commands = require('./commands')
 
-const TOKEN = process.env.TOKEN
+const TOKEN = config.TOKEN
 
 const broadcast = bot.voice.createBroadcast()
 
@@ -22,13 +23,13 @@ async function play(broadcast, file) {
 bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`)
 
-  let server = bot.guilds.cache.find(guild => guild.id === process.env.SERVER_ID)
+  let server = bot.guilds.cache.find(guild => guild.id === config.SERVER_ID)
   let voiceChannel = server.channels.cache.find(channel => channel.name === 'General')
   let voiceConnection = await voiceChannel.join()
   voiceConnection.play(broadcast)
 
   while (true) {
-    await play(broadcast, process.env.FILE)
+    await play(broadcast, config.FILE)
   }
 })
 
