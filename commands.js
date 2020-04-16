@@ -37,7 +37,7 @@ module.exports = {
   },
   motd: {
     exec: msg => {
-      msg.reply('MOTD: STAY HOME')
+      msg.reply('MOTD: STAY HOME OR I\'LL END YOU')
     }
   },
   avatar: {
@@ -60,5 +60,8 @@ module.exports = {
         msg.channel.send(`${msg.author}, `, attachment)
       }
     }
+  },
+  pronouns: {
+    exec: msg => msg.reply('I go by she/her')
   }
 }
