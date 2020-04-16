@@ -5,20 +5,14 @@ const bot = new Discord.Client()
 const config = require('./config.json')
 const commands = require('./commands')
 
+const AudioQueue = require('./AudioQueue')
+const StationMonitor = require('./StationMonitor')
+
 const TOKEN = config.TOKEN
 
 const broadcast = bot.voice.createBroadcast()
 
 bot.login(TOKEN)
-
-async function play(broadcast, file) {
-  let dispatcher = broadcast.play(file)
-  return new Promise(resolve => {
-    dispatcher.on('finish', () => {
-      resolve()
-    })
-  })
-}
 
 bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`)
@@ -28,9 +22,8 @@ bot.on('ready', async () => {
   let voiceConnection = await voiceChannel.join()
   voiceConnection.play(broadcast)
 
-  while (true) {
-    await play(broadcast, config.FILE)
-  }
+  let audioQueue = new AudioQueue(broadcast)
+  let stationMonitor = new StationMonitor(config.STATION, audioQueue)
 })
 
 bot.on('message', msg => {
