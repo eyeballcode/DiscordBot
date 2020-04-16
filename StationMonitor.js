@@ -300,7 +300,7 @@ module.exports = class StationMonitor {
           pattern.push('item/item10')
           pattern.push(`station/flt/${stationCodes[previousStop]}_flt`)
           pattern.push(`station/phr/${stationCodes[nextStop]}_phr`)
-        } if (lastStop === previousStop) {
+        } else if (lastStop === previousStop) {
           pattern.push(`station/flt/${stationCodes[previousStop]}_flt`)
           pattern.push(`station/phr/${stationCodes[nextStop]}_phr`)
         } else {
