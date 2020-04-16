@@ -3,6 +3,7 @@ const config = require('./config')
 const stationCodes = require('./station-codes')
 const stopGTFSIDs = require('./stations')
 const lines = require('./lines')
+const TimedCache = require('./TimedCache')
 const async = require('async')
 const fs = require('fs')
 const moment = require('moment')
@@ -39,6 +40,8 @@ module.exports = class StationMonitor {
     this.nextDepartures = []
     this.audioQueue = audioQueue
 
+    this.patternCache = new TimedCache(1000 * 60 * 2)
+
     this.runIDsSeen = []
 
     let files = fs.readdirSync(__dirname).filter(e => e.endsWith('.wav'))
@@ -47,7 +50,6 @@ module.exports = class StationMonitor {
     })
 
     this.audioScheduler()
-
   }
 
   async audioScheduler() {
@@ -66,6 +68,7 @@ module.exports = class StationMonitor {
 
       if (deviance > 1000 * 60 * 5) {
         let timeToDeparture = nextDeparture.estimatedDepartureTime - this.moment()
+
         if (timeToDeparture < 1000 * 60) // delayed train arriving now, play regular announcement now
           timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), 0)
         else // delayed train, play delay announcement at scheduled
@@ -75,7 +78,6 @@ module.exports = class StationMonitor {
       }
 
       this.monitorTimeouts.push(timeout)
-
     })
 
     setTimeout(this.audioScheduler.bind(this), 1000 * 45)
@@ -132,7 +134,12 @@ module.exports = class StationMonitor {
   }
 
   async getStoppingPattern(runID, isUp, station) {
-    let patternPayload = await ptvAPI(`/v3/pattern/run/${runID}/route_type/0?expand=stop`)
+    let patternPayload
+    let url = `/v3/pattern/run/${runID}/route_type/0?expand=stop`
+    if (!(patternPayload = this.patternCache.get(url))) {
+      patternPayload = await ptvAPI(url)
+      this.patternCache.set(url, patternPayload)
+    }
     let departures = patternPayload.departures
     let stops = patternPayload.stops
 
@@ -280,7 +287,7 @@ module.exports = class StationMonitor {
 
     let lastStop
 
-    for (let expressSector of expressParts) {
+    expressParts.forEach((expressSector, i) => {
       let firstExpressStop = expressSector[0]
       let lastExpressStop = expressSector.slice(-1)[0]
 
@@ -318,7 +325,7 @@ module.exports = class StationMonitor {
       }
 
       lastStop = nextStop
-    }
+    })
 
     if (relevantStops[relevantStops.indexOf(lastStop)] !== destination) {
       pattern.push('item/item48')
@@ -456,7 +463,7 @@ module.exports = class StationMonitor {
   }
 
   async getNextDeparture() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=5&expand=run&expand=route`)
+    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=3&expand=run&expand=route`)
 
     let departures = departurePayload.departures.map(this.transformDeparture)
     let runs = departurePayload.runs
@@ -473,7 +480,7 @@ module.exports = class StationMonitor {
   }
 
   async getFullNextDepartures() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=5&expand=run&expand=route`)
+    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=3&expand=run&expand=route`)
 
     let departures = departurePayload.departures.map(this.transformDeparture)
     let runs = departurePayload.runs

@@ -17,7 +17,7 @@ module.exports = class AudioQueue {
     let dispatcher = this.broadcast.play(file)
     return new Promise(resolve => {
       dispatcher.on('finish', () => {
-        fs.unlink(file, () => {})
+        fs.unlink(file, e => {})
         setTimeout(() => {
           this.currentlyPlaying = false
           this.checkPlay()

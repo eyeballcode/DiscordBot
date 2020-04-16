@@ -382,7 +382,7 @@ module.exports = {
     'Sunshine',
     'Albion',
     'Ginifer',
-    'St. Albans',
+    'St Albans',
     'Keilor Plains',
     'Watergardens',
     'Diggers Rest',
