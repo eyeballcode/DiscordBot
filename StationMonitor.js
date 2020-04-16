@@ -54,7 +54,7 @@ module.exports = class StationMonitor {
 
   async audioScheduler() {
     let nextDepartures = await this.getFullNextDepartures()
-    if (!nextDepartures.length) return setTimeout(audioScheduler, 1000 * 60 * 6)
+    if (!nextDepartures.length) return setTimeout(this.audioScheduler, 1000 * 60 * 6)
     this.nextDepartures = nextDepartures
 
     for (let i in this.monitorTimeouts) clearTimeout(i)
