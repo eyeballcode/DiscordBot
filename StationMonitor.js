@@ -67,21 +67,22 @@ module.exports = class StationMonitor {
 
       let timeout
 
-      if (deviance > 1000 * 60 * 5) {
+      if (deviance > 1000 * 60 * 5) { // more than 5min late
         let timeToDeparture = nextDeparture.estimatedDepartureTime - this.moment()
 
         if (timeToDeparture < 1000 * 60) { // delayed train arriving now, play regular announcement now
           console.log(`Scheduling arrival announcement for late ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} minutes now`)
-          timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), 0)
+          timeout = setTimeout(this.playServiceAudio.bind(this, false, null, nextDeparture), 0)
         } else { // delayed train, play delay announcement at scheduled
           if (twoMinToSchDeparture > 1000 * -60) {
             console.log(`Scheduling delay announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} minutes in ${twoMinToSchDeparture / 1000} seconds`)
-            timeout = setTimeout(this.checkDeparture.bind(this, true, timeToDeparture, nextDeparture), twoMinToSchDeparture)
+            timeout = setTimeout(this.playServiceAudio.bind(this, true, timeToDeparture, nextDeparture), twoMinToSchDeparture)
           }
         }
       } else { // on time train arriving, play regular announcement at scheduled
-        console.log(`Scheduling arrival announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} in ${(twoMinToSchDeparture + deviance) / 1000} seconds`)
-        timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), twoMinToSchDeparture + deviance)
+        twoMinToSchDeparture += Math.floor(deviance / 1000 / 30) * 1000 * 30 // round to nearest half minute since
+        console.log(`Scheduling arrival announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} in ${(twoMinToSchDeparture) / 1000} seconds`)
+        timeout = setTimeout(this.playServiceAudio.bind(this, false, null, nextDeparture), twoMinToSchDeparture)
       }
 
       this.monitorTimeouts[nextDeparture.runID] = timeout
@@ -90,7 +91,7 @@ module.exports = class StationMonitor {
     setTimeout(this.audioScheduler.bind(this), 1000 * 60)
   }
 
-  async checkDeparture(playDelayed, msToDeparture, nextDeparture) {
+  async playServiceAudio(playDelayed, msToDeparture, nextDeparture) {
     let index = this.currentlyReading.length
     this.currentlyReading.push(nextDeparture.outputFile)
 
