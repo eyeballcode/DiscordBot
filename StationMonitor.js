@@ -36,7 +36,7 @@ let cityLoopStations = ['Southern Cross', 'Parliament', 'Flagstaff', 'Melbourne 
 module.exports = class StationMonitor {
   constructor(station, audioQueue) {
     this.station = station
-    this.monitorTimeouts = []
+    this.monitorTimeouts = {}
     this.nextDepartures = []
     this.audioQueue = audioQueue
 
@@ -59,9 +59,8 @@ module.exports = class StationMonitor {
     if (!nextDepartures.length) return setTimeout(this.audioScheduler, 1000 * 60 * 6)
     this.nextDepartures = nextDepartures
 
-    for (let i in this.monitorTimeouts) clearTimeout(i)
-
     this.nextDepartures.forEach(nextDeparture => {
+      clearTimeout(this.monitorTimeouts[nextDeparture.runID])
       let deviance = nextDeparture.estimatedDepartureTime - nextDeparture.scheduledDepartureTime
       let msToSchDeparture = nextDeparture.scheduledDepartureTime - this.moment()
       let twoMinToSchDeparture = msToSchDeparture - 1000 * 60 * 2
@@ -83,7 +82,7 @@ module.exports = class StationMonitor {
         timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), twoMinToSchDeparture + deviance)
       }
 
-      this.monitorTimeouts.push(timeout)
+      this.monitorTimeouts[nextDeparture.runID] = timeout
     })
 
     setTimeout(this.audioScheduler.bind(this), 1000 * 45)
