@@ -476,7 +476,7 @@ module.exports = class StationMonitor {
   }
 
   async getNextDeparture() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=5&expand=run&expand=route`)
+    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=8&expand=run&expand=route`)
 
     let departures = departurePayload.departures.map(this.transformDeparture)
     let runs = departurePayload.runs
@@ -493,9 +493,10 @@ module.exports = class StationMonitor {
   }
 
   async getFullNextDepartures() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=5&expand=run&expand=route`)
+    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=8&expand=run&expand=route`)
 
     let departures = departurePayload.departures.map(this.transformDeparture)
+      .filter(departure => !this.runIDsSeen.includes(departure.run_id))
     let runs = departurePayload.runs
     let routes = departurePayload.routes
 
