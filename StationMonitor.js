@@ -40,9 +40,11 @@ module.exports = class StationMonitor {
     this.nextDepartures = []
     this.audioQueue = audioQueue
 
-    this.patternCache = new TimedCache(1000 * 60 * 2)
+    this.patternCache = new TimedCache(1000 * 60 * 3)
 
     this.runIDsSeen = []
+
+    this.currentlyReading = []
 
     let files = fs.readdirSync(__dirname).filter(e => e.endsWith('.wav'))
     files.forEach(file => {
@@ -69,11 +71,15 @@ module.exports = class StationMonitor {
       if (deviance > 1000 * 60 * 5) {
         let timeToDeparture = nextDeparture.estimatedDepartureTime - this.moment()
 
-        if (timeToDeparture < 1000 * 60) // delayed train arriving now, play regular announcement now
+        if (timeToDeparture < 1000 * 60) { // delayed train arriving now, play regular announcement now
+          console.log(`Scheduling arrival announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} seconds`)
           timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), 0)
-        else // delayed train, play delay announcement at scheduled
+        } else { // delayed train, play delay announcement at scheduled
+          console.log(`Scheduling delay announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} seconds`)
           timeout = setTimeout(this.checkDeparture.bind(this, true, timeToDeparture, nextDeparture), twoMinToSchDeparture)
+        }
       } else { // on time train arriving, play regular announcement at scheduled
+        console.log(`Scheduling arrival announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination}`)
         timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), twoMinToSchDeparture + deviance)
       }
 
@@ -84,6 +90,9 @@ module.exports = class StationMonitor {
   }
 
   async checkDeparture(playDelayed, msToDeparture, nextDeparture) {
+    let index = this.currentlyReading.length
+    this.currentlyReading.push(nextDeparture.outputFile)
+
     if (playDelayed) {
       let minutesToDeparture = Math.round(msToDeparture / 1000 / 60)
       let serviceName = this.getServiceNameFiles(nextDeparture.scheduledDepartureTime, nextDeparture.destination)
@@ -109,6 +118,7 @@ module.exports = class StationMonitor {
     }
 
     this.runIDsSeen = this.runIDsSeen.slice(-15)
+    this.currentlyReading.splice(index, 1)
   }
 
   transformDeparture(departure) {
@@ -458,7 +468,9 @@ module.exports = class StationMonitor {
     ]
 
     let outputFile = path.join(__dirname, `output-${station}-${scheduledDepartureTime.format('HHmm')}-${destination}.wav`)
-    await this.writeAudio(fullPattern, outputFile)
+
+    if (!this.currentlyReading.includes(outputFile))
+      await this.writeAudio(fullPattern, outputFile)
 
     return outputFile
   }
@@ -487,7 +499,7 @@ module.exports = class StationMonitor {
     let runs = departurePayload.runs
     let routes = departurePayload.routes
 
-    let nextDepartures = departures.filter(e => e.platform_number !== 'RRB').sort((a, b) => new Date(a.actual_departure_utc) - new Date(b.actual_departure_utc)).slice(0, 3)
+    let nextDepartures = departures.filter(e => e.platform_number !== 'RRB').sort((a, b) => new Date(a.actual_departure_utc) - new Date(b.actual_departure_utc)).slice(0, 4)
     return (await async.map(nextDepartures, async nextDeparture => {
       if (this.minutesDifference(nextDeparture.actual_departure_utc) > 10) return null
 

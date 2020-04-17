@@ -13,7 +13,6 @@
     "async": "^3.2.0",
     "bufferutil": "^4.0.1",
     "discord.js": "^12.1.1",
-    "dotenv": "^8.2.0",
     "erlpack": "github:discordapp/erlpack",
     "ffmpeg-static": "^4.1.1",
     "moment": "^2.24.0",
