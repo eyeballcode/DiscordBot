@@ -382,6 +382,7 @@ module.exports = class StationMonitor {
 
     let minuteFile = `time/minutes/min_${scheduledMinute < 10 ? '0' + scheduledMinute : scheduledMinute}`
     let hourFile = `time/the_hour/the_${scheduledHour12 < 10 ? '0' + scheduledHour12 : scheduledHour12}`
+    if (scheduledHour12 === 0) hourFile = 'time/the_hour/the_12'
 
     if (scheduledMinute === 0) {
       if (scheduledHour === 0) {
