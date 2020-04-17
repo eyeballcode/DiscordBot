@@ -70,12 +70,14 @@ module.exports = class StationMonitor {
       if (deviance > 1000 * 60 * 5) {
         let timeToDeparture = nextDeparture.estimatedDepartureTime - this.moment()
 
-        if (timeToDeparture < 1000 * 60) { // delayed train arriving now, play regular announcement now
+        if (timeToDeparture && timeToDeparture < 1000 * 60) { // delayed train arriving now, play regular announcement now
           console.log(`Scheduling arrival announcement for late ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} minutes now`)
           timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), 0)
         } else { // delayed train, play delay announcement at scheduled
-          console.log(`Scheduling delay announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} minutes in ${twoMinToSchDeparture / 1000} seconds`)
-          timeout = setTimeout(this.checkDeparture.bind(this, true, timeToDeparture, nextDeparture), twoMinToSchDeparture)
+          if (twoMinToSchDeparture > 1000 * -60) {
+            console.log(`Scheduling delay announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} minutes in ${twoMinToSchDeparture / 1000} seconds`)
+            timeout = setTimeout(this.checkDeparture.bind(this, true, timeToDeparture, nextDeparture), twoMinToSchDeparture)
+          }
         }
       } else { // on time train arriving, play regular announcement at scheduled
         console.log(`Scheduling arrival announcement for ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} in ${(twoMinToSchDeparture + deviance) / 1000} seconds`)
@@ -85,7 +87,7 @@ module.exports = class StationMonitor {
       this.monitorTimeouts[nextDeparture.runID] = timeout
     })
 
-    setTimeout(this.audioScheduler.bind(this), 1000 * 60 * 1.5)
+    setTimeout(this.audioScheduler.bind(this), 1000 * 60)
   }
 
   async checkDeparture(playDelayed, msToDeparture, nextDeparture) {
