@@ -70,7 +70,7 @@ module.exports = class StationMonitor {
       if (deviance > 1000 * 60 * 5) {
         let timeToDeparture = nextDeparture.estimatedDepartureTime - this.moment()
 
-        if (timeToDeparture && timeToDeparture < 1000 * 60) { // delayed train arriving now, play regular announcement now
+        if (timeToDeparture < 1000 * 60) { // delayed train arriving now, play regular announcement now
           console.log(`Scheduling arrival announcement for late ${nextDeparture.scheduledDepartureTime.format('HH:mm')} ${nextDeparture.destination} which is delayed by ${deviance / 1000 / 60} minutes now`)
           timeout = setTimeout(this.checkDeparture.bind(this, false, null, nextDeparture), 0)
         } else { // delayed train, play delay announcement at scheduled
@@ -289,7 +289,7 @@ module.exports = class StationMonitor {
         pattern.push(`station/exc/${stationCodes[expressParts[0][0]]}_exc`)
         pattern.push('item/item15')
       } else {
-        pattern.push(`station/sen/${stationCodes[destination]}_sen`)
+        pattern.push(`station/phr/${stationCodes[destination]}_phr`)
         pattern.push(`station/exc/${stationCodes[expressParts[0][0]]}_exc`)
       }
 
@@ -349,7 +349,12 @@ module.exports = class StationMonitor {
           pattern.push('station/sen/fss_sen')
         }
       } else {
-        pattern.push(`station/sen/${stationCodes[destination]}_sen`)
+        if (viaCityLoop) {
+          pattern.push(`station/phr/${stationCodes[destination]}_phr`)
+          pattern.push('item/item15')
+        } else {
+          pattern.push(`station/sen/${stationCodes[destination]}_sen`)
+        }
       }
     }
 
