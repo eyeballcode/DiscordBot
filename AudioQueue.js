@@ -14,15 +14,19 @@ module.exports = class AudioQueue {
   }
 
   play(file) {
-    let dispatcher = this.broadcast.play(file)
     return new Promise(resolve => {
-      dispatcher.on('finish', () => {
-        fs.unlink(file, e => {})
-        setTimeout(() => {
-          this.currentlyPlaying = false
-          this.checkPlay()
-        }, 500)
-        resolve()
+      let newFile = file.slice(0, -4) + '-copy.wav'
+      fs.copyFile(file, newFile, () => {
+        let dispatcher = this.broadcast.play(newFile)
+        dispatcher.on('finish', () => {
+          fs.unlink(file, e => {})
+          fs.unlink(newFile, e => {})
+          setTimeout(() => {
+            this.currentlyPlaying = false
+            this.checkPlay()
+          }, 500)
+          resolve()
+        })
       })
     })
   }
