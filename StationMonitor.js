@@ -439,7 +439,14 @@ module.exports = class StationMonitor {
       right = [...right, ...fileData[1]]
     })
 
-    let buffer = wav.encode([left, right], {sampleRate: 44100, float: true, bitDepth: 32})
+    let original = 44100
+    let dropFactor = 3
+    let final = Math.floor(original / dropFactor)
+
+    left = left.filter((e, i) => i % dropFactor == 0)
+    right = right.filter((e, i) => i % dropFactor == 0)
+
+    let buffer = wav.encode([left, right], {sampleRate: final, float: true, bitDepth: 32})
 
     await this.writeFile(outputFile, buffer)
   }

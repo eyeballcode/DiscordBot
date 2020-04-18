@@ -16,7 +16,7 @@ bot.login(TOKEN)
 bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`)
 
-  let server = bot.guilds.cache.find(guild => guild.id === config.SERVER_ID)
+  let server = bot.guilds.cache.get(config.SERVER_ID)
   let voiceChannel = server.channels.cache.find(channel => channel.name === 'General')
   let voiceConnection = await voiceChannel.join()
   voiceConnection.play(broadcast)
