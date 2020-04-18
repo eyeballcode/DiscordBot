@@ -440,13 +440,13 @@ module.exports = class StationMonitor {
     })
 
     let original = 44100
-    let dropFactor = 3
+    let dropFactor = 2
     let final = Math.floor(original / dropFactor)
 
     left = left.filter((e, i) => i % dropFactor == 0)
     right = right.filter((e, i) => i % dropFactor == 0)
 
-    let buffer = wav.encode([left, right], {sampleRate: final, float: true, bitDepth: 32})
+    let buffer = wav.encode([left, right], {sampleRate: final, float: true, bitDepth: 24})
 
     await this.writeFile(outputFile, buffer)
   }
@@ -489,25 +489,8 @@ module.exports = class StationMonitor {
     return outputFile
   }
 
-  async getNextDeparture() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=8&expand=run&expand=route`)
-
-    let departures = departurePayload.departures.map(this.transformDeparture)
-    let runs = departurePayload.runs
-    let routes = departurePayload.routes
-
-    let nextDeparture = departures.sort((a, b) => new Date(a.actual_departure_utc) - new Date(b.actual_departure_utc))[0]
-    if (this.minutesDifference(nextDeparture.actual_departure_utc) > 10) return null
-
-    return {
-      scheduledDepartureTime: this.moment(nextDeparture.scheduled_departure_utc),
-      estimatedDepartureTime: this.moment(nextDeparture.estimated_departure_utc),
-      runID: nextDeparture.run_id
-    }
-  }
-
   async getFullNextDepartures() {
-    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=8&expand=run&expand=route`)
+    let departurePayload = await ptvAPI(`/v3/departures/route_type/0/stop/${stopGTFSIDs[this.station]}?gtfs=true&max_results=3&expand=run&expand=route`)
 
     let departures = departurePayload.departures.map(this.transformDeparture)
       .filter(departure => !this.runIDsSeen.includes(departure.run_id))

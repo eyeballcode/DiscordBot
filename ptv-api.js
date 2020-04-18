@@ -1,29 +1,23 @@
 const crypto = require('crypto')
 const {PTVKEY, PTVDEVID} = require('./config.json')
-const request = require('request-promise')
+const request = require('request')
 
-async function httpRequest(...options) {
+function httpRequest(url) {
   let start = +new Date()
 
-  let body
-  if (typeof options[0] === 'string')
-    body = await request(options[0], {
+  return new Promise(resolve => {
+    request(url, {
       timeout: 5000,
-      ...(options || {})
+      gzip: true,
+      forever: true
+    }, (err, data, body) => {
+      let end = +new Date()
+      let diff = end - start
+      console.log(`${diff}ms ${url}`)
+
+      resolve(body)
     })
-  else
-    body = await request({
-      timeout: 5000,
-      ...options
-    })
-
-  let url = typeof options[0] === 'string' ? options[0] : options[0].url
-
-  let end = +new Date()
-  let diff = end - start
-  console.log(`${diff}ms ${url}`)
-
-  return body
+  })
 }
 
 function getURL(request) {
