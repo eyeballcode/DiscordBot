@@ -342,20 +342,11 @@ module.exports = class StationMonitor {
     if (relevantStops[relevantStops.indexOf(lastStop)] !== destination) {
       pattern.push('item/item48')
       pattern.push('item/item42')
-      if (destination === 'Flinders Street') {
-        if (viaCityLoop) {
-          pattern.push('station/phr/fss_phr')
-          pattern.push('item/item15')
-        } else {
-          pattern.push('station/sen/fss_sen')
-        }
+      if (viaCityLoop) {
+        pattern.push(`station/phr/${stationCodes[destination]}_phr`)
+        pattern.push('item/item15')
       } else {
-        if (viaCityLoop) {
-          pattern.push(`station/phr/${stationCodes[destination]}_phr`)
-          pattern.push('item/item15')
-        } else {
-          pattern.push(`station/sen/${stationCodes[destination]}_sen`)
-        }
+        pattern.push(`station/sen/${stationCodes[destination]}_sen`)
       }
     }
 

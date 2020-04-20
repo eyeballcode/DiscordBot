@@ -1,5 +1,5 @@
 const { MessageAttachment } = require('discord.js')
-const request = require('request').defaults({ encoding: null })
+const request = require('request-promise')
 
 module.exports = {
   hello: {
@@ -63,5 +63,18 @@ module.exports = {
   },
   pronouns: {
     exec: msg => msg.reply('I go by she/her')
+  },
+  track: {
+    exec: async (msg, args) => {
+      let fleet = args[0]
+      if (!fleet) return msg.reply('You need to specify a fleet #')
+
+      let data = JSON.parse(await request(`https://vic.transportsg.me/tracker2/bus-bot?fleet=${fleet}`))
+      let text = data.map(trip => {
+        return `${trip.departureTime} ${trip.routeNumber}: ${trip.origin} - ${trip.destination}`
+      }).join('\n')
+
+      msg.reply(`Trips today: \n${text}`)
+    }
   }
 }
