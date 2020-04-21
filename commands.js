@@ -1,5 +1,7 @@
 const { MessageAttachment } = require('discord.js')
 const request = require('request-promise')
+const getClasses = require('./classes')
+const config = require('./config')
 
 module.exports = {
   hello: {
@@ -75,6 +77,24 @@ module.exports = {
       }).join('\n')
 
       msg.reply(`Trips today: \n${text}`)
+    }
+  },
+  classes: {
+    exec: async msg => {
+      let user = `${msg.author.username}#${msg.author.discriminator}`
+      if (config.ICAL[user]) {
+        let classes = await getClasses(config.ICAL[user])
+
+        let text = `Your next class is ${classes.next.subjectName} at ${classes.next.location} with ${classes.next.teacher} at ${classes.next.start}
+Your following class is ${classes.following.subjectName} at ${classes.following.location} with ${classes.following.teacher} at ${classes.following.start}`
+        if (classes.current) {
+          text = `You currently have ${classes.current.subjectName} at ${classes.current.location} with ${classes.current.teacher} until ${classes.current.end}\n${text}`
+        }
+
+        msg.reply(text)
+      } else {
+        msg.reply('Sorry, I don\'t have your classes')
+      }
     }
   }
 }

@@ -17,12 +17,14 @@ bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`)
 
   let server = bot.guilds.cache.get(config.SERVER_ID)
-  let voiceChannel = server.channels.cache.find(channel => channel.name === 'General')
-  let voiceConnection = await voiceChannel.join()
-  voiceConnection.play(broadcast)
+  if (config.voice) {
+    let voiceChannel = server.channels.cache.find(channel => channel.name === 'General')
+    let voiceConnection = await voiceChannel.join()
+    voiceConnection.play(broadcast)
 
-  let audioQueue = new AudioQueue(broadcast)
-  let stationMonitor = new StationMonitor(config.STATION, audioQueue)
+    let audioQueue = new AudioQueue(broadcast)
+    let stationMonitor = new StationMonitor(config.STATION, audioQueue)
+  }
 })
 
 bot.on('message', msg => {
