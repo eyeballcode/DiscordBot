@@ -21,6 +21,7 @@ function parseClass(event) {
     teacher: event.description.slice(-4),
     start: start.format('HH:mm'),
     end: end.format('HH:mm'),
+    startTime: start,
     endTime: end
   }
 }
@@ -32,14 +33,15 @@ async function getEvents(url) {
 
   let rawEvents = ical.sync.parseICS(data)
   let events = Object.values(rawEvents)
-  let now = new Date()
+  let now = +new Date()
 
-  let upcoming = events.filter(event => event.start > now).sort((a, b) => a.start - b.start).map(parseClass)
+  let upcoming = events.filter(event => event.end > now).sort((a, b) => a.start - b.start).map(parseClass)
   let next = upcoming[0]
   let following = upcoming[1]
   let third = upcoming[2]
 
-  if (next.endTime < now) { // Class currently running
+
+  if (next.startTime < now) { // Class currently running
     return {
       current: next,
       next: following,
