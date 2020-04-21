@@ -100,13 +100,19 @@ module.exports = {
     }
   },
   classes: {
-    exec: async msg => {
+    exec: async (msg, args) => {
       let target = msg.mentions.users.first() || msg.author
       let user = `${target.username}#${target.discriminator}`
-      if (config.CLASSES[user]) {
-        let userClasses = classes.filter(clazz => clazz.students.includes(config.CLASSES[user]))
 
-        userClasses = userClasses.map(clazz => {
+      let matchingClasses
+      if (args[0] && args[0].length === 4) {
+        matchingClasses = classes.filter(clazz => clazz.teacher === args[0])
+      } else if (config.CLASSES[user]) {
+        matchingClasses = classes.filter(clazz => clazz.students.includes(config.CLASSES[user]))
+      }
+
+      if (matchingClasses) {
+        matchingClasses = matchingClasses.map(clazz => {
           let classCode = clazz.classCode
           let subjectCode = classCode.replace(/\d[A-Z]?$/, '')
           let subjectName = codeToNames[subjectCode]
@@ -128,7 +134,7 @@ module.exports = {
 
         let now = moment.tz('Australia/Melbourne')
 
-        let upcoming = userClasses.filter(event => event.endTime > now).sort((a, b) => a.startTime - b.startTime)
+        let upcoming = matchingClasses.filter(event => event.endTime > now).sort((a, b) => a.startTime - b.startTime)
 
         let current, next, following
 
