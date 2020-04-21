@@ -17,7 +17,7 @@ bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`)
 
   let server = bot.guilds.cache.get(config.SERVER_ID)
-  if (config.voice) {
+  if (config.VOICE) {
     let voiceChannel = server.channels.cache.find(channel => channel.name === 'General')
     let voiceConnection = await voiceChannel.join()
     voiceConnection.play(broadcast)
