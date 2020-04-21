@@ -4,6 +4,23 @@ const getClasses = require('./classes')
 const config = require('./config')
 
 module.exports = {
+  help: {
+    exec: msg => {
+      msg.reply(`
+!help: lists the commands
+!hello: say hi
+!is_ron_straight: is ron straight?
+!straight?: is the person straight?
+!kill: kill someone
+!motd: message
+!avatar: show a user's avatar
+!waifu <count>: sends waifu
+!pronouns: what pronouns does the bot use
+!track: tracks a bus
+!classes: what is my next class
+`)
+    }
+  },
   hello: {
     exec: msg => {
       msg.reply('Hello!')
