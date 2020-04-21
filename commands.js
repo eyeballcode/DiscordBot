@@ -1,10 +1,11 @@
-const { MessageAttachment } = require('discord.js')
+const { MessageAttachment, MessageEmbed } = require('discord.js')
 const request = require('request-promise')
 const classes = require('./classes.json')
 const codeToNames = require('./code-to-names.json')
 const config = require('./config')
 const moment = require('moment')
 require('moment-timezone')
+const activities = require('./activities')
 
 module.exports = {
   help: {
@@ -120,6 +121,11 @@ module.exports = {
           let start = moment.tz(clazz.start, 'Australia/Melbourne')
           let end = moment.tz(clazz.end, 'Australia/Melbourne')
 
+          let activityID = activities[clazz.classCode]
+          let startTimestamp = moment.utc(clazz.start).format('DDMMYYYYHHmm')
+
+          let compassURL = `https://jmss-vic.compass.education/Organise/Activities/Activity.aspx#session/${activityID}${startTimestamp}`
+
           return {
             classCode,
             subjectName,
@@ -128,7 +134,8 @@ module.exports = {
             start: start.format('HH:mm'),
             end: end.format('HH:mm'),
             startTime: start,
-            endTime: end
+            endTime: end,
+            compassURL
           }
         })
 
@@ -147,13 +154,30 @@ module.exports = {
           following = upcoming[1]
         }
 
-        let text = `Your next class is ${next.subjectName} at ${next.location} with ${next.teacher} at ${next.start}
-Your following class is ${following.subjectName} at ${following.location} with ${following.teacher} at ${following.start}`
-        if (current) {
-          text = `You currently have ${current.subjectName} at ${current.location} with ${current.teacher} until ${current.end}\n${text}`
+        let embeds = []
+
+        function createEmbed(type, clazz) {
+          embeds.push(new MessageEmbed()
+            .setTitle(`${type}: ${clazz.subjectName}`)
+            .setURL(clazz.compassURL)
+            .addFields(
+              { name: 'Location', value: clazz.location, inline: true },
+              { name: 'Teacher', value: clazz.teacher, inline: true },
+              { name: 'Start', value: clazz.start, inline: true }
+            )
+          )
         }
 
-        msg.reply(text)
+        if (current) {
+          createEmbed('Current Class', current)
+        }
+
+        createEmbed('Next Class', next)
+        createEmbed('Following Class', following)
+
+        for (let embed of embeds) {
+          msg.reply(embed)
+        }
       } else {
         msg.reply('Sorry, I don\'t have your classes')
       }
