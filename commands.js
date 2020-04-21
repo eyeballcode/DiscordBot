@@ -1,7 +1,10 @@
 const { MessageAttachment } = require('discord.js')
 const request = require('request-promise')
-const getClasses = require('./classes')
+const classes = require('./classes.json')
+const codeToNames = require('./code-to-names.json')
 const config = require('./config')
+const moment = require('moment')
+require('moment-timezone')
 
 module.exports = {
   help: {
@@ -98,14 +101,50 @@ module.exports = {
   },
   classes: {
     exec: async msg => {
-      let user = `${msg.author.username}#${msg.author.discriminator}`
-      if (config.ICAL[user]) {
-        let classes = await getClasses(config.ICAL[user])
+      let target = msg.mentions.users.first() || msg.author
+      let user = `${target.username}#${target.discriminator}`
+      if (config.CLASSES[user]) {
+        let userClasses = classes.filter(clazz => clazz.students.includes(config.CLASSES[user]))
 
-        let text = `Your next class is ${classes.next.subjectName} at ${classes.next.location} with ${classes.next.teacher} at ${classes.next.start}
-Your following class is ${classes.following.subjectName} at ${classes.following.location} with ${classes.following.teacher} at ${classes.following.start}`
-        if (classes.current) {
-          text = `You currently have ${classes.current.subjectName} at ${classes.current.location} with ${classes.current.teacher} until ${classes.current.end}\n${text}`
+        userClasses = userClasses.map(clazz => {
+          let classCode = clazz.classCode
+          let subjectCode = classCode.replace(/\d[A-Z]?$/, '')
+          let subjectName = codeToNames[subjectCode]
+
+          let start = moment.tz(clazz.start, 'Australia/Melbourne')
+          let end = moment.tz(clazz.end, 'Australia/Melbourne')
+
+          return {
+            classCode,
+            subjectName,
+            location: clazz.location,
+            teacher: clazz.teacher,
+            start: start.format('HH:mm'),
+            end: end.format('HH:mm'),
+            startTime: start,
+            endTime: end
+          }
+        })
+
+        let now = moment.tz('Australia/Melbourne')
+
+        let upcoming = userClasses.filter(event => event.endTime > now).sort((a, b) => a.startTime - b.startTime)
+
+        let current, next, following
+
+        if (upcoming[0].startTime < now) {
+          current = upcoming[0]
+          next = upcoming[1]
+          following = upcoming[2]
+        } else {
+          next = upcoming[0]
+          following = upcoming[1]
+        }
+
+        let text = `Your next class is ${next.subjectName} at ${next.location} with ${next.teacher} at ${next.start}
+Your following class is ${following.subjectName} at ${following.location} with ${following.teacher} at ${following.start}`
+        if (current) {
+          text = `You currently have ${current.subjectName} at ${current.location} with ${current.teacher} until ${current.end}\n${text}`
         }
 
         msg.reply(text)
