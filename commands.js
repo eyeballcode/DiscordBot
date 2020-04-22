@@ -100,6 +100,19 @@ module.exports = {
       msg.reply(`Trips today: \n${text}`)
     }
   },
+  'track_service': {
+    exec: async (msg, args) => {
+      let service = args[0]
+      if (!service) return msg.reply('You need to specify a service #')
+
+      let data = JSON.parse(await request(`https://vic.transportsg.me/tracker2/bus-bot?service=${service}`))
+      let text = data.map(trip => {
+        return `${trip.fleetNumber}: ${trip.departureTime} ${trip.origin} - ${trip.destination}`
+      }).join('\n')
+
+      msg.reply(`Trips today: \n${text}`)
+    }
+  },
   classes: {
     exec: async (msg, args) => {
       let target = msg.mentions.users.first() || msg.author
