@@ -7,11 +7,44 @@ const commands = require('./commands')
 const AudioQueue = require('./AudioQueue')
 const StationMonitor = require('./StationMonitor')
 
+const classes = require('./classes.json')
+
 const TOKEN = config.TOKEN
 
 const broadcast = bot.voice.createBroadcast()
 
 bot.login(TOKEN)
+
+let trackClasses = classes.filter(clazz => clazz.students.includes(config.TRACK_CLASS)).sort((a, b) => new Date(a.start) - new Date(b.start))
+
+function setClassStatus() {
+  let now = new Date()
+  let next = trackClasses.find(clazz => new Date(clazz.end) > now)
+  let start = new Date(next.start)
+
+  if (start < now) {
+    let subjectCode = next.classCode.replace(/\d[A-Z]?$/, '')
+    let subjectName = config.SUBJECTS[subjectCode]
+    let subjectFormat = config.SUBJECT_FORMAT[subjectCode] || 'ed die in {}'
+    subjectFormat = subjectFormat.replace('{}', subjectName)
+
+    bot.user.setPresence({
+      status: 'online',
+      activity: {
+        name: subjectFormat,
+        type: 'WATCHING'
+      }
+    })
+  } else {
+    bot.user.setPresence({
+      status: 'online',
+      activity: {
+        name: config.SUBJECT_FORMAT.NO_CLASS,
+        type: 'WATCHING'
+      }
+    })
+  }
+}
 
 bot.on('ready', async () => {
   console.info(`Logged in as ${bot.user.tag}!`)
@@ -26,13 +59,10 @@ bot.on('ready', async () => {
     let stationMonitor = new StationMonitor(config.STATION, audioQueue)
   }
 
-  bot.user.setPresence({
-    status: "online",
-    activity: {
-      name: "ed die in methods",
-      type: "WATCHING" 
-    }
-  })
+  setInterval(() => {
+    setClassStatus()
+  }, 1000 * 60 * 5)
+  setClassStatus()
 })
 
 bot.on('message', msg => {
