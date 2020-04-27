@@ -25,6 +25,14 @@ bot.on('ready', async () => {
     let audioQueue = new AudioQueue(broadcast)
     let stationMonitor = new StationMonitor(config.STATION, audioQueue)
   }
+
+  bot.user.setPresence({
+    status: "online",
+    activity: {
+      name: "ed die in methods",
+      type: "WATCHING" 
+    }
+  })
 })
 
 bot.on('message', msg => {
