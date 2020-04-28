@@ -38,7 +38,7 @@ function setClassStatus() {
       }
     })
 
-    let timeToEndClass = new Date(following.end) - now
+    let timeToEndClass = new Date(next.end) - now
     setTimeout(setClassStatus, timeToEndClass + 1000)
   } else {
     bot.user.setPresence({
