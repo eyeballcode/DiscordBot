@@ -20,6 +20,8 @@ let trackClasses = classes.filter(clazz => clazz.students.includes(config.TRACK_
 function setClassStatus() {
   let now = new Date()
   let next = trackClasses.find(clazz => new Date(clazz.end) > now)
+  let following = trackClasses.find(clazz => new Date(clazz.end) > now && clazz !== next)
+  let hasBreak = next.end !== following.start
   let start = new Date(next.start)
 
   if (start < now) {
@@ -35,6 +37,9 @@ function setClassStatus() {
         type: 'WATCHING'
       }
     })
+
+    let timeToEndClass = new Date(following.end) - now
+    setTimeout(setClassStatus, timeToNextClass + 1000)
   } else {
     bot.user.setPresence({
       status: 'online',
@@ -43,6 +48,9 @@ function setClassStatus() {
         type: 'WATCHING'
       }
     })
+
+    let timeToNextClass = new Date(next.start) - now
+    setTimeout(setClassStatus, timeToNextClass + 1000)
   }
 }
 
@@ -59,9 +67,6 @@ bot.on('ready', async () => {
     let stationMonitor = new StationMonitor(config.STATION, audioQueue)
   }
 
-  setInterval(() => {
-    setClassStatus()
-  }, 1000 * 60 * 5)
   setClassStatus()
 })
 
