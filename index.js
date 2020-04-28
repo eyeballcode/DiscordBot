@@ -39,7 +39,7 @@ function setClassStatus() {
     })
 
     let timeToEndClass = new Date(following.end) - now
-    setTimeout(setClassStatus, timeToNextClass + 1000)
+    setTimeout(setClassStatus, timeToEndClass + 1000)
   } else {
     bot.user.setPresence({
       status: 'online',
