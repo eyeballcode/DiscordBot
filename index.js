@@ -27,7 +27,7 @@ global.setClassStatus = function setClassStatus(stop) {
   if (start < now) {
     let subjectCode = next.classCode.replace(/\d[A-Z]?$/, '')
     let subjectName = config.SUBJECTS[subjectCode]
-    let subjectFormat = config.SUBJECT_FORMAT[subjectCode] || 'ed die in {}'
+    let subjectFormat = config.SUBJECT_FORMAT[subjectCode] || config.SUBJECT_FORMAT.DEFAULT
     subjectFormat = subjectFormat.replace('{}', subjectName)
 
     bot.user.setPresence({
@@ -90,7 +90,7 @@ bot.on('message', msg => {
 })
 
 if (config.server) {
-  setTimeout(() => {
+  setInterval(() => {
     require('child_process').exec('systemctl restart rice')
   }, 1000 * 60 * 60)
 }
