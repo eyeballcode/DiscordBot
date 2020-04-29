@@ -14,8 +14,8 @@ async function getRanking() {
   })
 
   let data = JSON.parse(body)
-  let user = data.data.find(u => u.attributes.user === userID)
-  return user.attributes
+
+  return data
 }
 
 async function getQuestion() {

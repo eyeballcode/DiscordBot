@@ -205,8 +205,14 @@ module.exports = {
       if (cache.get('r')) {
         msg.reply(cache.get('r'))
       } else {
-        let ranking = await rice.getRanking()
-        let message = `Rank: ${ranking.rank}, Grains: ${ranking.rice}`
+        let data = await rice.getRanking()
+        let user = data.data.find(u => u.attributes.user === config.USERID)
+        let ranking = user.attributes
+        let nextUser = data.data.find(u => u.attributes.rank === ranking.rank + 1)
+
+        let difference = ranking.rice / nextUser.attributes.rice * 100
+
+        let message = `Rank: ${ranking.rank}, Grains: ${ranking.rice}. You are ${difference.toFixed(1)}% of rank ${ranking.rank + 1}`
         cache.set('r', message)
         msg.reply(message)
       }
