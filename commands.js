@@ -6,6 +6,10 @@ const config = require('./config')
 const moment = require('moment')
 require('moment-timezone')
 const activities = require('./activities')
+const rice = require('./rice')
+const TimedCache = require('./TimedCache')
+
+let cache = new TimedCache(1000 * 60)
 
 module.exports = {
   help: {
@@ -193,6 +197,18 @@ module.exports = {
         }
       } else {
         msg.reply('Sorry, I don\'t have your classes')
+      }
+    }
+  },
+  rice: {
+    exec: async msg => {
+      if (cache.get('r')) {
+        msg.reply(cache.get('r'))
+      } else {
+        let ranking = await rice.getRanking()
+        let message = `Rank: ${ranking.rank}, Grains: ${ranking.rice}`
+        cache.set('r', message)
+        msg.reply(message)
       }
     }
   }
