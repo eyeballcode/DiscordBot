@@ -6,7 +6,7 @@ const config = require('./config')
 const moment = require('moment')
 require('moment-timezone')
 const activities = require('./activities')
-const rice = require('./rice')
+const rice = require('./rice0')
 const TimedCache = require('./TimedCache')
 
 let cache = new TimedCache(1000 * 60)
@@ -230,7 +230,7 @@ module.exports = {
 
       setTimeout(() => {
         setClassStatus(true)
-      }, args[0] * 1000 * 60 || 60000)
+      }, (args[0] * 1000 * 60) || 60000)
     }
   }
 }

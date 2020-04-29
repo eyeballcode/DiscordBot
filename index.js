@@ -88,3 +88,9 @@ bot.on('message', msg => {
     }
   }
 })
+
+if (config.server) {
+  setTimeout(() => {
+    require('child_process').exec('systemctl restart rice')
+  }, 1000 * 60 * 60)
+}
