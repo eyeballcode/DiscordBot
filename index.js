@@ -17,7 +17,7 @@ bot.login(TOKEN)
 
 let trackClasses = classes.filter(clazz => clazz.students.includes(config.TRACK_CLASS)).sort((a, b) => new Date(a.start) - new Date(b.start))
 
-function setClassStatus() {
+global.setClassStatus = function setClassStatus(stop) {
   let now = new Date()
   let next = trackClasses.find(clazz => new Date(clazz.end) > now)
   let following = trackClasses.find(clazz => new Date(clazz.end) > now && clazz !== next)
@@ -38,8 +38,10 @@ function setClassStatus() {
       }
     })
 
-    let timeToEndClass = new Date(next.end) - now
-    setTimeout(setClassStatus, timeToEndClass + 1000)
+    if (!stop) {
+      let timeToEndClass = new Date(next.end) - now
+      setTimeout(setClassStatus, timeToEndClass + 1000)
+    }
   } else {
     bot.user.setPresence({
       status: 'online',
@@ -49,8 +51,10 @@ function setClassStatus() {
       }
     })
 
-    let timeToNextClass = new Date(next.start) - now
-    setTimeout(setClassStatus, timeToNextClass + 1000)
+    if (!stop) {
+      let timeToNextClass = new Date(next.start) - now
+      setTimeout(setClassStatus, timeToNextClass + 1000)
+    }
   }
 }
 
@@ -78,7 +82,7 @@ bot.on('message', msg => {
     let args = (parts[2] || '').trim().split(/ +/)
 
     if (commands[command]) {
-      commands[command].exec(msg, args)
+      commands[command].exec(msg, args, bot)
     } else {
       msg.reply(`Could not find command ${command}`)
     }

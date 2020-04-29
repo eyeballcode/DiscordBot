@@ -217,5 +217,20 @@ module.exports = {
         msg.reply(message)
       }
     }
+  },
+  set_status: {
+    exec: (msg, args, bot) => {
+      bot.user.setPresence({
+        status: 'online',
+        activity: {
+          name: args.slice(1).join(' '),
+          type: 'WATCHING'
+        }
+      })
+
+      setTimeout(() => {
+        setClassStatus(true)
+      }, args[0] * 1000 * 60 || 60000)
+    }
   }
 }
