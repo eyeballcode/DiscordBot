@@ -48,7 +48,7 @@ module.exports = {
       let {username} = user
 
       let straight = ['Xager_0', 'Incompetent']
-      console.log(username, straight)
+
       if (straight.includes(username))
         msg.reply(`Yes, ${user} is straight`)
       else
@@ -200,24 +200,24 @@ module.exports = {
       }
     }
   },
-  rice: {
-    exec: async msg => {
-      if (cache.get('r')) {
-        msg.reply(cache.get('r'))
-      } else {
-        let data = await rice.getRanking()
-        let user = data.data.find(u => u.attributes.user === config.USERID)
-        let ranking = user.attributes
-        let nextUser = data.data.find(u => u.attributes.rank === ranking.rank + 1)
-
-        let difference = ranking.rice / nextUser.attributes.rice * 100
-
-        let message = `Rank: ${ranking.rank}, Grains: ${ranking.rice}. You are ${difference.toFixed(1)}% of rank ${ranking.rank + 1}`
-        cache.set('r', message)
-        msg.reply(message)
-      }
-    }
-  },
+  // rice: {
+  //   exec: async msg => {
+  //     if (cache.get('r')) {
+  //       msg.reply(cache.get('r'))
+  //     } else {
+  //       let data = await rice.getRanking()
+  //       let user = data.data.find(u => u.attributes.user === config.USERID)
+  //       let ranking = user.attributes
+  //       let nextUser = data.data.find(u => u.attributes.rank === ranking.rank + 1)
+  //
+  //       let difference = ranking.rice / nextUser.attributes.rice * 100
+  //
+  //       let message = `Rank: ${ranking.rank}, Grains: ${ranking.rice}. You are ${difference.toFixed(1)}% of rank ${ranking.rank + 1}`
+  //       cache.set('r', message)
+  //       msg.reply(message)
+  //     }
+  //   }
+  // },
   set_status: {
     exec: (msg, args, bot) => {
       bot.user.setPresence({

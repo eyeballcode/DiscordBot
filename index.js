@@ -72,6 +72,15 @@ bot.on('ready', async () => {
   }
 
   setClassStatus()
+
+  let id = '700142033435754526'
+  let log = server.channels.cache.find(channel => channel.name === 'shits-and-giggles')
+
+  bot.on('channelUpdate', (oldChannel, newChannel) => {
+    if (newChannel.id === id) {
+      log.send(`name change ${new Date()}, ${newChannel.name}`)
+    }
+  })
 })
 
 bot.on('message', msg => {
