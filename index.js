@@ -91,6 +91,7 @@ bot.on('message', msg => {
     let args = (parts[2] || '').trim().split(/ +/)
 
     if (commands[command]) {
+      msg.react('🏳️‍🌈')
       commands[command].exec(msg, args, bot)
     } else {
       msg.reply(`Could not find command ${command}`)
