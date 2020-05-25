@@ -206,11 +206,18 @@ module.exports = {
       if (!service) return msg.reply('You need to specify a service #')
 
       let data = JSON.parse(await request(`https://vic.transportsg.me/tracker2/bus-bot?service=${service}`))
-        let text = data.map(trip => {
+        let lines = data.map(trip => {
           return `${trip.fleetNumber}: ${trip.departureTime} ${trip.origin} - ${trip.destination}`
-        }).join('\n')
+        })
 
-        msg.reply(`Trips today: \n${text}`)
+        let chunks = []
+        for (let i = 0; i < lines.length; i += 15) {
+          chunks.push(lines.slice(i, i + 15))
+        }
+
+        chunks.forEach((chunk) => {
+          msg.reply(chunk.join('\n'))
+        })
       }
     },
     classes: {
