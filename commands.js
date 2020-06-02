@@ -108,17 +108,17 @@ module.exports = {
   help: {
     exec: msg => {
       msg.reply(`
-        !help: lists the commands
-        !hello: say hi
-        !is_ron_straight: is ron straight?
-        !straight?: is the person straight?
-        !kill: kill someone
-        !motd: message
-        !avatar: show a user's avatar
-        !waifu <count>: sends waifu
-        !pronouns: what pronouns does the bot use
-        !track: tracks a bus
-        !classes: what is my next class
+!help: lists the commands
+!hello: say hi
+!is_ron_straight: is ron straight?
+!straight?: is the person straight?
+!kill: kill someone
+!motd: message
+!avatar: show a user's avatar
+!waifu <count>: sends waifu
+!pronouns: what pronouns does the bot use
+!track: tracks a bus
+!classes: what is my next class
       `)
     }
   },
@@ -303,24 +303,24 @@ module.exports = {
       }
     }
   },
-  // rice: {
-  //   exec: async msg => {
-  //     if (cache.get('r')) {
-  //       msg.reply(cache.get('r'))
-  //     } else {
-  //       let data = await rice.getRanking()
-  //       let user = data.data.find(u => u.attributes.user === config.USERID)
-  //       let ranking = user.attributes
-  //       let nextUser = data.data.find(u => u.attributes.rank === ranking.rank + 1)
-  //
-  //       let difference = ranking.rice / nextUser.attributes.rice * 100
-  //
-  //       let message = `Rank: ${ranking.rank}, Grains: ${ranking.rice}. You are ${difference.toFixed(1)}% of rank ${ranking.rank + 1}`
-  //       cache.set('r', message)
-  //       msg.reply(message)
-  //     }
-  //   }
-  // },
+  rice: {
+    exec: async msg => {
+      if (cache.get('r')) {
+        msg.reply(cache.get('r'))
+      } else {
+        let data = await rice.getRanking()
+        let user = data.data.find(u => u.attributes.user === config.USERID)
+        let ranking = user.attributes
+        let nextUser = data.data.find(u => u.attributes.rank === ranking.rank + 1)
+
+        let difference = ranking.rice / nextUser.attributes.rice * 100
+
+        let message = `Rank: ${ranking.rank}, Grains: ${ranking.rice}. You are ${difference.toFixed(1)}% of rank ${ranking.rank + 1}`
+        cache.set('r', message)
+        msg.reply(message)
+      }
+    }
+  },
   set_status: {
     exec: (msg, args, bot) => {
       bot.user.setPresence({

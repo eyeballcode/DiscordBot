@@ -4,13 +4,13 @@ let gameID = config.GAMEID
 let category = config.CATEGORY
 let userID = config.USERID
 let level = 2
+let bearerToken = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTEwNjExMzgsImV4cCI6MTU5MzY1MzEzOCwidXVpZCI6ImM4ZTczZTgwLTc1MDAtNDc5YS04MzBjLWQwOGZlZTI5ZWU5YiJ9.CjLgvPtcT7LhmZ4r-XYhScU51zTbXk_XdYhiXFEVEBQ'
+let userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15'
+let headers = { 'Content-Type': 'application/json', Authorization: bearerToken, 'User-Agent': userAgent }
 
 async function getRanking() {
   let body = await r.get(`https://engine.freerice.com/group-members?_format=json&group=9f93e4a5-eecc-4dbe-a512-dc4754dee2bc&current=1&limit=20`, {
-    headers: {
-      Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODgwNzUwODEsImV4cCI6MTU5MDY2NzA4MSwidXVpZCI6IjhkYjRjMDIwLTUzNzctNDZhMS1hYTI4LTA3NzBmZDFlNTlmMyJ9.FlbONoT4FvorT_jxccCOfIl3PYGlQ20nRqvulG_S8xo',
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15'
-    }
+    headers
   })
 
   let data = JSON.parse(body)
@@ -20,10 +20,7 @@ async function getRanking() {
 
 async function getQuestion() {
   let body = await r.get(`https://engine.freerice.com/games/${gameID}`, {
-    headers: {
-      Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODgwNzUwODEsImV4cCI6MTU5MDY2NzA4MSwidXVpZCI6IjhkYjRjMDIwLTUzNzctNDZhMS1hYTI4LTA3NzBmZDFlNTlmMyJ9.FlbONoT4FvorT_jxccCOfIl3PYGlQ20nRqvulG_S8xo',
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15'
-    }
+    headers
   })
 
   return JSON.parse(body)
@@ -36,11 +33,7 @@ async function answerQuestion(question, answer) {
       question,
       user: userID
     }),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODgwNzUwODEsImV4cCI6MTU5MDY2NzA4MSwidXVpZCI6IjhkYjRjMDIwLTUzNzctNDZhMS1hYTI4LTA3NzBmZDFlNTlmMyJ9.FlbONoT4FvorT_jxccCOfIl3PYGlQ20nRqvulG_S8xo',
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15'
-    },
+    headers,
     simple: false
   })
 
@@ -52,11 +45,7 @@ async function levelUp() {
     body: JSON.stringify({
       category, level
     }),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1ODgwNzUwODEsImV4cCI6MTU5MDY2NzA4MSwidXVpZCI6IjhkYjRjMDIwLTUzNzctNDZhMS1hYTI4LTA3NzBmZDFlNTlmMyJ9.FlbONoT4FvorT_jxccCOfIl3PYGlQ20nRqvulG_S8xo',
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15'
-    },
+    headers,
     simple: false
   })
 
