@@ -56,7 +56,7 @@ module.exports = class StationMonitor {
 
   async audioScheduler() {
     let nextDepartures = await this.getFullNextDepartures()
-    if (!nextDepartures.length) return setTimeout(this.audioScheduler,bind(this), 1000 * 60 * 12)
+    if (!nextDepartures.length) return setTimeout(this.audioScheduler.bind(this), 1000 * 60 * 12)
     this.nextDepartures = nextDepartures
 
     this.nextDepartures.forEach(nextDeparture => {
@@ -303,16 +303,27 @@ module.exports = class StationMonitor {
       let firstExpressStop = expressSector[0]
       let lastExpressStop = expressSector.slice(-1)[0]
 
-      let previousStop = relevantStops[relevantStops.indexOf(firstExpressStop) - 1]
-      let nextStop = relevantStops[relevantStops.indexOf(lastExpressStop) + 1]
+      let previousStopIndex = relevantStops.indexOf(firstExpressStop) - 1
+      let nextStopIndex = relevantStops.indexOf(lastExpressStop) + 1
+
+      let previousStop = relevantStops[previousStopIndex]
+      let nextStop = relevantStops[nextStopIndex]
 
       if (lastStop) {
+        let lastStopIndex = relevantStops.indexOf(lastStop)
+
         if (i === expressParts.length - 1 && nextStop === destination) {
           pattern.push('item/item48')
-          pattern.push('item/item10')
+          if (lastStopIndex !== previousStopIndex) {
+            pattern.push('item/item10')
+          }
           pattern.push(`station/flt/${stationCodes[previousStop]}_flt`)
           pattern.push(`station/phr/${stationCodes[nextStop]}_phr`)
         } else if (lastStop === previousStop) {
+          pattern.push(`station/flt/${stationCodes[previousStop]}_flt`)
+          pattern.push(`station/phr/${stationCodes[nextStop]}_phr`)
+        } else if (lastStopIndex + 1 == previousStopIndex) {
+          pattern.push('item/item10')
           pattern.push(`station/flt/${stationCodes[previousStop]}_flt`)
           pattern.push(`station/phr/${stationCodes[nextStop]}_phr`)
         } else {
