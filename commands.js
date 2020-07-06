@@ -235,8 +235,11 @@ module.exports = {
         if (matchingClasses) {
           matchingClasses = matchingClasses.map(clazz => {
             let classCode = clazz.classCode
+
             let subjectCode = classCode.replace(/\d[A-Z]?$/, '')
             let subjectName = codeToNames[subjectCode]
+
+            if (classCode.startsWith('STAFFDUTY')) subjectName = classCode
 
             let start = moment.tz(clazz.start, 'Australia/Melbourne')
             let end = moment.tz(clazz.end, 'Australia/Melbourne')

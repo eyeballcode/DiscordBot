@@ -63,7 +63,7 @@ bot.on('ready', async () => {
 
   let server = bot.guilds.cache.get(config.SERVER_ID)
   if (config.VOICE) {
-    let voiceChannel = server.channels.cache.find(channel => channel.name === 'General')
+    let voiceChannel = server.channels.cache.find(channel => channel.name === 'rit likes anime girls')
     let voiceConnection = await voiceChannel.join()
     voiceConnection.play(broadcast)
 

@@ -3,7 +3,7 @@ const config = require('./config')
 let gameID
 let category = "66f2a9aa-bac2-5919-997d-2d17825c1837"
 let userID = config.USERID
-let level = 1
+let level = 2
 let bearerToken = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1OTI5NDI2NTQsImV4cCI6MTU5NTUzNDY1NCwidXVpZCI6IjRlMGZmNTE5LTE2MGQtNGQ4OS1hYzhiLWUyM2FjN2JhNjFhZCJ9.j5s0VL0f3iOGpRGIBW_PySbY_13n9w3IIWX1xuIVeVs'
 let userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Safari/605.1.15'
 let headers = { 'Content-Type': 'application/json', Authorization: bearerToken, 'User-Agent': userAgent }
@@ -12,7 +12,7 @@ async function getGame() {
   let body = await r.post('https://engine.freerice.com/games', {
     body: JSON.stringify({
       category,
-      level: 1,
+      level,
       user: userID
     }),
     headers
@@ -99,7 +99,7 @@ function sleep() {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve()
-    }, 1200)
+    }, 2000)
   })
 }
 
