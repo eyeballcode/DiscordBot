@@ -18,7 +18,6 @@ let messages = [
   "%s has been disposed of.",
   "%s has been crushed by a piano",
   "A pack of wild wolves ate %s",
-  "%s committed suicide instead of git commit.",
   "%s? They were trampled to death at a football match",
   "Why did you kill %s? Who is going to clean it up?",
   "Too little MLP watching killed %s",
